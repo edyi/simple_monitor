@@ -1,1 +1,3 @@
 .secret.sh
+result/*.ng
+result/*.ok

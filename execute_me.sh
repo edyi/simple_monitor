@@ -2,35 +2,66 @@
 
 ## webhookのURLを読み込む（暗号化しておく）
 source $(dirname $0)/.secret.sh || { echo 'cannot read .secret.sh' ; exit 1 ;}
-
 ## ドメインのリストを作成しておき、読み込む
 source $(dirname $0)/domains.sh || { echo 'cannot read domains.sh' ; exit 1 ;}
+## functionsを読み込む
+source $(dirname $0)/functions.sh || { echo 'cannot read functions.sh' ; exit 1 ;}
 
-## ドメインのチェックをまわす
+
+## ドメインのチェックをforでまわす
 for domain in ${domains[@]}
   do
-      ## digコマンドとpingコマンドを打つ
+      ## 監視結果のファイルを置く場所
+      file_ok="result/$domain.ok"
+      file_ng="result/$domain.ng"
+
+      ## 簡易監視。digコマンドとpingコマンドを打って結果を代入する
       ip=$(dig $domain +short)
       ping=$(ping -c 1 $domain | grep ttl )
 
       ## 両方成功した場合は次の処理へ、失敗したら@hereを付けてslackに飛ばす
       if [ -n "$ip" -a -n "$ping" ]; then
-        status=_OK
-        mention=""
-        continue
+          ## OKだった記録を残す
+          touch $file_ok
+
+          ## ドメインのNG結果ファイルを確認し、存在していたら復活ということなのでslackに通知する
+          if [ -e "$file_ng" ]; then
+              ## Slackに飛ばす
+              slack_recovery
+
+              ## 復活したのでNGファイルを削除する
+              rm -f $file_ng
+          else
+              ## 監視に成功し、NGファイルがなければ問題ないのでそのままcontinueする
+              continue 3
+          fi        
       else
-        status=_NG
-        mention="<!here>"
+          ## 監視に失敗し、NGファイルもOKファイルもなかったら最初のNGということなので通知する（これは初回実行時にNGだったときの処理）
+          if [ ! -e "$file_ng" -a ! -e "$file_ok" ]; then
+              ## Slackに飛ばす
+              slack_ng
+              ## NGだった記録を残す
+              touch $file_ng
+              continue 3
+          fi
 
-        ## ペイロード部分を作成する
-        data="--- Status: $status $mention\n Domain: $domain\n IP: $ip\n Ping: $ping\n"
-        message="{\"text\":\"${data}\"}"
+          ## NGファイルまたはOKファイルが既にある場合、ここではNGだった記録を残す
+          touch $file_ng
 
-        ## Slackに飛ばす
-        head="Content-type: application/json"
-        curl -X POST -H '${head}' --data "${message}" ${webhook}
+          ## OKファイルがあったらNGに状態変化したという事なのでslackに通知する
+          if [ -e "$file_ok" ]; then
+              ## Slackに飛ばす
+              slack_ng
+
+              ## NGになったのでOKファイルを削除する
+              rm -f $file_ok
+
+            elif [ -e "$file_ng" ]; then
+            ## NGファイルがあるということは以前からNGなので復活するまでslackには送らない
+            continue 3
+          fi
       fi
 
-      ## 連続投稿ができない場合は待つ
-      # sleep 1
+        ## 連続投稿ができない場合は待つ
+        # sleep 1
 done

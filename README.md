@@ -1,3 +1,6 @@
+# 簡単なURLのチェックをして結果をslackに飛ばしたかった
+- 書き方のサンプル用。
+
 ## .secret.shにslackのwebhookのURLを書く
 - webhookのURLは公開できないので.gitignore書く
 
@@ -17,5 +20,6 @@ domains=(
 
 ## 実行する
 sh execute_me.sh
+
 
 
