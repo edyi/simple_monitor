@@ -20,7 +20,7 @@ for domain in ${domains[@]}
         continue
       else
         status=_NG
-        mension="<!here>"
+        mention="<!here>"
 
         ## ペイロード部分を作成する
         data="--- Status: $status $mention\n Domain: $domain\n IP: $ip\n Ping: $ping\n"

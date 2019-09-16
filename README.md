@@ -1,11 +1,13 @@
 ## .secret.shにslackのwebhookのURLを書く
-- webhookのURLは公開できないので.gitignoreに書いておく
-<b>.secret.sh</b>
+- webhookのURLは公開できないので.gitignore書く
+
+.secret.sh
 ```
 webhook="https://hooks.slack.com/services/xxxxxxxxxx/xxxxxxxxxx/xxxxxxxxxx"
 ```
 
-## domains.shドメインを書く
+## ドメインを書く
+domains.sh
 ```
 domains=(
     www.examples.com
