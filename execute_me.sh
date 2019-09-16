@@ -16,14 +16,14 @@ for domain in ${domains[@]}
       ## 両方成功した場合は次の処理へ、失敗したら@hereを付けてslackに飛ばす
       if [ -n "$ip" -a -n "$ping" ]; then
         status=_OK
-        mension=""
+        mention=""
         continue
       else
         status=_NG
         mension="<!here>"
 
         ## ペイロード部分を作成する
-        data="--- Status: $status$mension\n Domain: $domain\n IP: $ip\n Ping: $ping\n"
+        data="--- Status: $status $mention\n Domain: $domain\n IP: $ip\n Ping: $ping\n"
         message="{\"text\":\"${data}\"}"
 
         ## Slackに飛ばす
