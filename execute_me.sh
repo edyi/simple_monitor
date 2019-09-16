@@ -12,8 +12,8 @@ source $(dirname $0)/functions.sh || { echo 'cannot read functions.sh' ; exit 1 
 for domain in ${domains[@]}
   do
       ## 監視結果のファイルを置く場所
-      file_ok="result/$domain.ok"
-      file_ng="result/$domain.ng"
+      file_ok="$(dirname $0)/result/$domain.ok"
+      file_ng="$(dirname $0)/result/$domain.ng"
 
       ## 簡易監視。digコマンドとpingコマンドを打って結果を代入する
       ip=$(dig $domain +short)
