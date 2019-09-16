@@ -17,3 +17,12 @@ function slack_ng() {
     head="Content-type: application/json"
     curl -X POST -H '${head}' --data "${message}" ${webhook}
 }
+
+function slack_check() {
+    status=enable
+    mention=""
+    data="\`\`\`サーバのチェック用。\n hostname: $1\n uptime: $2\n ps: $3\`\`\`"
+    message="{\"text\":\"${data}\"}"
+    head="Content-type: application/json"
+    curl -X POST -H '${head}' --data "${message}" ${webhook}
+}
